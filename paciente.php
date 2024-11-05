@@ -24,11 +24,14 @@ switch ($method) {
         break;
 
     case 'POST':
-        $name = $input['name'];
-        $email = $input['email'];
-        $age = $input['age'];
-        $conn->query("INSERT INTO users (name, email, age) VALUES ('$name', '$email', $age)");
-        echo json_encode(["message" => "User added successfully"]);
+        $cpf = $input['cpf'];
+        $nome = $input['nome'];
+        $telefone = $input['telefone'];
+
+        $cpfLimpo = preg_replace('/\D/', '', $cpf);
+
+        $conn->query("INSERT INTO paciente (nome, telefone, cpf) VALUES ('$nome', '$telefone', '$cpfLimpo')");
+        echo json_encode(["message" => "Cadastro realizado com sucesso !"]);
         break;
 
     case 'PUT':

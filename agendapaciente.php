@@ -10,17 +10,15 @@ switch ($method) {
     case 'GET':
         
         $telefone = $_GET['telefone'];
+        $id_especialidade = $_GET['id_especialidade'];
 
-        $result = $conn->query("select a.horario, e.descricao from agenda a 
-                                        inner join paciente p on a.id_paciente = p.id_paciente 
-                                        inner join especialidade e on a.id_especialidade = e.id_especialidade  
-                                        where p.telefone ='$telefone'");
+        $result = $conn->query("call getAgenda('$telefone', $id_especialidade)");
         
-        $agenda = [];
+        $agenda = "";
         while ($row = $result->fetch_assoc()) {
-            $agenda[] = $row;
+            $agenda =  $agenda.$row['id_temp']." - ".$row['horario_formatado'].PHP_EOL;
         }
-        echo json_encode(['agenda' => $agenda]);
+        echo json_encode(['lista_horarios' => $agenda]);
         
 
         break;

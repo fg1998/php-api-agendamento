@@ -9,46 +9,37 @@ $input = json_decode(file_get_contents('php://input'), true);
 switch ($method) {
     case 'GET':
         
-        $especialidade = $_GET['especialidade'];
+        $id_especialidade = $_GET['id_especialidade'];
+        $id_temp = $_GET['id_temp'];
+        $telefone = $_GET['telefone'];
 
-        // Define o locale para português do Brasil
-        //$formatter = new IntlDateFormatter('pt_BR', IntlDateFormatter::FULL, IntlDateFormatter::SHORT);
-        //$formatter->setPattern('E dd/MM HH:mm'); // Formato para 'Seg 01/11 09:00'
+        $result = $conn->query("SELECT horario_formatado, id_temp, id_agenda
+                                        from agenda_temp
+                                        where id_especialidade = $id_especialidade
+                                        and id_temp = $id_temp
+                                        and telefone = '$telefone'");
         
-        $result = $conn->query("SELECT a.id_agenda, a.horario, e.descricao, a.horario_formatado
-                                        FROM agenda a 
-                                        INNER JOIN especialidade e ON e.id_especialidade = a.id_especialidade 
-                                        WHERE e.id_especialidade = $especialidade and id_paciente is null
-                                        order by horario ");
+        $data = $result->fetch_assoc();
+        echo json_encode(value : $data);
         
-        $agenda = [];
-        $retorno = "";
-        $linha = 1;
-        while ($row = $result->fetch_assoc()) {
-            // Converte e formata o campo 'horario' usando IntlDateFormatter
-            //$timestamp = strtotime($row['horario']);
-            //$row['horario'] = $formatter->format($timestamp);
-        
-            // Adiciona o dado com 'horario' formatado ao array
-            $agenda[] = $row;
-            $retorno = $retorno.$linha." - ".$row['horario_formatado'].PHP_EOL;
-            $linha++;
-        }
-        
-        echo json_encode(['agenda' => $retorno]);
         
 
         break;
 
     case 'POST':
-        $horario = $input['horario'];
-        $especialidade_selecionada = $input['especialidade_selecionada'];
+        $id_agenda = $input['id_agenda'];
         $id_paciente = $input['id_paciente'];
         
-        $conn->query("update agenda a inner join especialidade e on a.id_especialidade = e.id_especialidade 
-                            set id_paciente=$id_paciente
-                            where a.horario_formatado='$horario' and e.descricao ='$especialidade_selecionada' ");
-        echo json_encode(["message" => "Consulta agendanda com sucesso !!"]);
+        $conn->query("call updateAgenda($id_agenda, $id_paciente, @affected_rows)");
+        $result = $conn->query("SELECT @affected_rows AS affected_rows");
+        
+        if ($result) {
+            $data = $result->fetch_assoc();
+            echo json_encode($data);
+        } else {
+            echo json_encode(["error" => "Erro ao buscar número de linhas afetadas"]);
+        }
+        
         break;
 
     case 'PUT':
