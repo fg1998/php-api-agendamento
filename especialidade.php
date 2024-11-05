@@ -8,6 +8,14 @@ $input = json_decode(file_get_contents('php://input'), true);
 
 switch ($method) {
     case 'GET':
+        if(isset($_GET['especialidade'])) {
+            $especialidade = $_GET['especialidade'];
+            $result = $conn->query("select * from especialidade where id_especialidade=$especialidade");
+            $data = $result->fetch_assoc();
+            echo json_encode(value :['especialidade' => $data]);
+        }
+        else {
+
             $result = $conn->query("select * from especialidade ");
             $especialidades = [];
             $retorno = "";
@@ -17,8 +25,7 @@ switch ($method) {
             }
             //echo $retorno;
             echo json_encode(['especialidade' => $retorno]);
-        
-
+        }
         break;
 
     case 'POST':
