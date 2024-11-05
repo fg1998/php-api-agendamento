@@ -12,15 +12,18 @@ switch ($method) {
         $especialidade = $_GET['especialidade'];
 
         // Define o locale para português do Brasil
-        $formatter = new IntlDateFormatter('pt_BR', IntlDateFormatter::FULL, IntlDateFormatter::SHORT);
-        $formatter->setPattern('E dd/MM HH:mm'); // Formato para 'Seg 01/11 09:00'
+        //$formatter = new IntlDateFormatter('pt_BR', IntlDateFormatter::FULL, IntlDateFormatter::SHORT);
+        //$formatter->setPattern('E dd/MM HH:mm'); // Formato para 'Seg 01/11 09:00'
         
         $result = $conn->query("SELECT a.id_agenda, a.horario, e.descricao, a.horario_formatado
-                                FROM agenda a 
-                                INNER JOIN especialidade e ON e.id_especialidade = a.id_especialidade 
-                                WHERE e.descricao LIKE '$especialidade' and id_paciente is null");
+                                        FROM agenda a 
+                                        INNER JOIN especialidade e ON e.id_especialidade = a.id_especialidade 
+                                        WHERE e.id_especialidade = $especialidade and id_paciente is null
+                                        order by horario ");
         
         $agenda = [];
+        $retorno = "";
+        $linha = 1;
         while ($row = $result->fetch_assoc()) {
             // Converte e formata o campo 'horario' usando IntlDateFormatter
             //$timestamp = strtotime($row['horario']);
@@ -28,9 +31,11 @@ switch ($method) {
         
             // Adiciona o dado com 'horario' formatado ao array
             $agenda[] = $row;
+            $retorno = $retorno.$linha." - ".$row['horario_formatado'].PHP_EOL;
+            $linha++;
         }
         
-        echo json_encode(['agenda' => $agenda]);
+        echo json_encode(['agenda' => $retorno]);
         
 
         break;
