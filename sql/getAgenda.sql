@@ -26,3 +26,4 @@ BEGIN
     WHERE telefone = telefone_filter 
       AND id_especialidade = id_especialidade_filter;
 END;
+
